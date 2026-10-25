@@ -75,7 +75,7 @@ virtual-ai-assistant/
    python -m unittest discover -s tests -v
    ```
 
-Verified with Python 3.13.5: `python -m unittest discover -s tests -v` ran **28 tests; all passed**.
+Verified with Python 3.13.5: `python -m unittest discover -s tests -v` ran **31 tests; all passed**.
 
 ## Command reference
 
@@ -186,9 +186,9 @@ Inputs flow through multiplication and addition, then a step activation converts
 
 ## Testing strategy and actual result
 
-The automated tests cover arithmetic operations and malformed input, command intents and exit, unknown and similar-but-unrelated words, personalized session behavior, activity boundaries, perceptron output/validation, and game hints/attempt handling. They use deterministic inputs instead of internet access or external test dependencies.
+The automated tests cover arithmetic operations, malformed input, and non-finite/overflow calculator values; command intents and exit; unknown and similar-but-unrelated words; personalized session behavior; startup and in-session EOF; game output-handler propagation; activity boundaries; perceptron output/validation; and game hints/attempt handling. They use deterministic inputs instead of internet access or external test dependencies.
 
-**Verified test result:** 28 automated tests passed using Python 3.13.5 (`python -m unittest discover -s tests -v`).
+**Verified test result:** 31 automated tests passed using Python 3.13.5 (`python -m unittest discover -s tests -v`).
 
 ### Manual test checklist (25 representative inputs/actions)
 

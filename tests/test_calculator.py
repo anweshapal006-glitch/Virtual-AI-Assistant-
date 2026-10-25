@@ -32,6 +32,15 @@ class CalculatorTests(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     calculate_expression(expression)
 
+    def test_rejects_non_finite_operands_and_overflow_results(self):
+        huge_operand = "9" * 400
+        with self.assertRaisesRegex(ValueError, "supported range"):
+            calculate_expression(f"{huge_operand} + 1")
+
+        large_finite_operand = "1" + ("0" * 200)
+        with self.assertRaisesRegex(ValueError, "supported range"):
+            calculate_expression(f"{large_finite_operand} * {large_finite_operand}")
+
 
 if __name__ == "__main__":
     unittest.main()

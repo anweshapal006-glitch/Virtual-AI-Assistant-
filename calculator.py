@@ -1,5 +1,6 @@
 """A deliberately small, safe parser for basic arithmetic."""
 
+import math
 import re
 
 
@@ -30,16 +31,23 @@ def calculate_expression(expression: str) -> float:
 
     left = float(left_text)
     right = float(right_text)
+    if not math.isfinite(left) or not math.isfinite(right):
+        raise ValueError("Numbers must be within the calculator's supported range.")
 
     if operator == "+":
-        return left + right
-    if operator == "-":
-        return left - right
-    if operator == "*":
-        return left * right
-    if right == 0:
+        result = left + right
+    elif operator == "-":
+        result = left - right
+    elif operator == "*":
+        result = left * right
+    elif right == 0:
         raise ZeroDivisionError("Cannot divide by zero.")
-    return left / right
+    else:
+        result = left / right
+
+    if not math.isfinite(result):
+        raise ValueError("The result is outside the calculator's supported range.")
+    return result
 
 
 def format_number(number: float) -> str:

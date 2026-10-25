@@ -16,6 +16,7 @@ def process_command(
     session_state: dict[str, str],
     input_fn: Callable[[str], str] = input,
     random_number: int | None = None,
+    output_fn: Callable[[str], None] = print,
 ) -> tuple[str, bool]:
     """Route normalized user text to a feature and return (response, should_exit)."""
     normalized = command.strip().lower().rstrip("?!.,")
@@ -65,7 +66,11 @@ def process_command(
         return f"{name}, here's a fact: {get_fact()}", False
 
     if normalized in {"game", "play game", "number game", "guess", "guessing game"}:
-        outcome = play_guessing_game(input_fn=input_fn, secret_number=random_number)
+        outcome = play_guessing_game(
+            input_fn=input_fn,
+            output_fn=output_fn,
+            secret_number=random_number,
+        )
         return f"{name}, {outcome}", False
 
     if normalized in {"activity", "recommend", "recommend activity", "what should i do"}:
@@ -90,7 +95,12 @@ def run_assistant(
     output_fn("        Mini Alexa - Virtual AI Assistant")
     output_fn("=" * 42)
 
-    name = input_fn("What is your name? ").strip() or "Friend"
+    try:
+        name = input_fn("What is your name? ").strip() or "Friend"
+    except EOFError:
+        output_fn(farewell_message("Friend"))
+        return
+
     session_state = {"user_name": name}
     output_fn(greeting_message(name))
     output_fn(welcome_message(name))
@@ -98,7 +108,12 @@ def run_assistant(
     while True:
         try:
             command = input_fn("You: ")
-            response, should_exit = process_command(command, session_state, input_fn)
+            response, should_exit = process_command(
+                command,
+                session_state,
+                input_fn=input_fn,
+                output_fn=output_fn,
+            )
         except EOFError:
             output_fn(farewell_message(name))
             break

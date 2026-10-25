@@ -1,6 +1,8 @@
 """Tests for command routing and the main interactive session."""
 
 from datetime import datetime
+from contextlib import redirect_stdout
+from io import StringIO
 import unittest
 from unittest.mock import patch
 
@@ -91,6 +93,15 @@ class AssistantCommandTests(unittest.TestCase):
 
 
 class AssistantLoopTests(unittest.TestCase):
+    def test_eof_at_name_prompt_exits_cleanly(self):
+        output = []
+
+        def read_input(_prompt):
+            raise EOFError
+
+        main.run_assistant(input_fn=read_input, output_fn=output.append)
+        self.assertTrue(any("Goodbye, Friend" in line for line in output))
+
     def test_name_capture_welcome_and_personalized_farewell(self):
         answers = iter(["Ada", "quote", "goodbye"])
         output = []
@@ -118,6 +129,20 @@ class AssistantLoopTests(unittest.TestCase):
         output = []
         main.run_assistant(input_fn=read_input, output_fn=output.append)
         self.assertTrue(any("Goodbye, Grace" in line for line in output))
+
+    def test_game_messages_use_the_assistant_output_handler(self):
+        answers = iter(["Ada", "game", "3", "9", "7", "goodbye"])
+        output = []
+        unexpected_stdout = StringIO()
+
+        with patch("game.random.randint", return_value=7), redirect_stdout(unexpected_stdout):
+            main.run_assistant(input_fn=lambda _prompt: next(answers), output_fn=output.append)
+
+        self.assertEqual(unexpected_stdout.getvalue(), "")
+        self.assertTrue(any("You have 5 guesses" in line for line in output))
+        self.assertIn("Too low!", output)
+        self.assertIn("Too high!", output)
+        self.assertTrue(any("You win!" in line for line in output))
 
 
 if __name__ == "__main__":
